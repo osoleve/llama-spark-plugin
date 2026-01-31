@@ -7,13 +7,15 @@ chat completion via the Model Context Protocol.
 """
 
 import json
-import os
 import httpx
 from pathlib import Path
 from mcp.server.fastmcp import FastMCP
 
 STATE_FILE = Path.home() / ".llama-server-state.json"
 DEFAULT_TIMEOUT = 120.0  # Long timeout for slow generations
+
+# Allowed hosts to prevent SSRF via state file manipulation
+ALLOWED_HOSTS = frozenset({"127.0.0.1", "localhost", "0.0.0.0", "::1"})
 
 mcp = FastMCP("llama")
 
@@ -46,32 +48,51 @@ def _read_state() -> dict | None:
     return state
 
 
-def _get_base_url(state: dict) -> str:
-    """Build base URL from state."""
+def _get_base_url(state: dict) -> tuple[str, str | None]:
+    """
+    Build base URL from state with host validation.
+
+    Returns (url, error_message). If error_message is not None, url should not be used.
+    """
     host = state.get("host", "127.0.0.1")
     port = state.get("port", 30000)
-    return f"http://{host}:{port}"
+
+    # SSRF protection: only allow loopback addresses
+    if host not in ALLOWED_HOSTS:
+        return "", f"Error: Host '{host}' not allowed. Only loopback addresses permitted."
+
+    return f"http://{host}:{port}", None
 
 
 @mcp.tool()
-def llama_status() -> str:
+async def llama_status() -> str:
     """Check if llama-server is running and return its status."""
     state = _read_state()
     if not state:
         return "llama-server is not running. Use /llama:serve to start it."
 
-    base_url = _get_base_url(state)
+    base_url, err = _get_base_url(state)
+    if err:
+        return err
 
     try:
-        with httpx.Client(timeout=5.0) as client:
-            resp = client.get(f"{base_url}/health")
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            resp = await client.get(f"{base_url}/health")
             if resp.status_code == 200:
+                # Safe JSON parsing
+                health_data = "ok"
+                if resp.headers.get("content-type", "").startswith("application/json"):
+                    try:
+                        health_data = resp.json()
+                    except json.JSONDecodeError:
+                        health_data = "ok (parse error)"
+
                 return json.dumps({
                     "status": "running",
                     "model": state.get("model", "unknown"),
                     "port": state.get("port"),
                     "started_at": state.get("started_at"),
-                    "health": resp.json() if resp.headers.get("content-type", "").startswith("application/json") else "ok"
+                    "health": health_data
                 }, indent=2)
     except httpx.RequestError as e:
         return f"llama-server state exists but not responding: {e}"
@@ -80,7 +101,7 @@ def llama_status() -> str:
 
 
 @mcp.tool()
-def llama_chat(
+async def llama_chat(
     messages: list[dict],
     temperature: float = 0.7,
     max_tokens: int = 2048,
@@ -95,6 +116,7 @@ def llama_chat(
         temperature: Sampling temperature (0.0-2.0, default 0.7)
         max_tokens: Maximum tokens to generate (default 2048)
         system_prompt: Optional system prompt prepended to messages
+                       (ignored if messages already starts with a system message)
 
     Returns:
         The assistant's response text, or an error message.
@@ -106,10 +128,12 @@ def llama_chat(
     if not state:
         return "Error: llama-server is not running. Use /llama:serve to start it."
 
-    base_url = _get_base_url(state)
+    base_url, err = _get_base_url(state)
+    if err:
+        return err
 
-    # Prepend system prompt if provided
-    if system_prompt:
+    # Prepend system prompt only if provided AND messages doesn't already have one
+    if system_prompt and (not messages or messages[0].get("role") != "system"):
         messages = [{"role": "system", "content": system_prompt}] + messages
 
     payload = {
@@ -120,8 +144,8 @@ def llama_chat(
     }
 
     try:
-        with httpx.Client(timeout=DEFAULT_TIMEOUT) as client:
-            resp = client.post(
+        async with httpx.AsyncClient(timeout=DEFAULT_TIMEOUT) as client:
+            resp = await client.post(
                 f"{base_url}/v1/chat/completions",
                 json=payload,
                 headers={"Content-Type": "application/json"},
@@ -150,7 +174,7 @@ def llama_chat(
 
 
 @mcp.tool()
-def llama_complete(
+async def llama_complete(
     prompt: str,
     temperature: float = 0.7,
     max_tokens: int = 2048,
@@ -158,6 +182,8 @@ def llama_complete(
 ) -> str:
     """
     Send a raw completion request to the local llama-server.
+
+    Note: Uses llama.cpp's native /completion endpoint, not OpenAI-compatible.
 
     Args:
         prompt: The text prompt to complete
@@ -172,7 +198,9 @@ def llama_complete(
     if not state:
         return "Error: llama-server is not running. Use /llama:serve to start it."
 
-    base_url = _get_base_url(state)
+    base_url, err = _get_base_url(state)
+    if err:
+        return err
 
     payload = {
         "prompt": prompt,
@@ -184,8 +212,8 @@ def llama_complete(
         payload["stop"] = stop
 
     try:
-        with httpx.Client(timeout=DEFAULT_TIMEOUT) as client:
-            resp = client.post(
+        async with httpx.AsyncClient(timeout=DEFAULT_TIMEOUT) as client:
+            resp = await client.post(
                 f"{base_url}/completion",
                 json=payload,
                 headers={"Content-Type": "application/json"},
