@@ -29,7 +29,7 @@ usage() {
 # Check for huggingface-cli
 if ! command -v huggingface-cli &>/dev/null; then
     echo "Error: huggingface-cli not found"
-    echo "Install with: pip install huggingface_hub"
+    echo "Install with: uv tool install huggingface_hub"
     exit 1
 fi
 

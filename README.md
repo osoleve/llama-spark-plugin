@@ -129,11 +129,11 @@ Example usage (Claude will use these automatically when appropriate):
 
 ### MCP Dependencies
 
-The plugin uses a virtual environment for isolation. Set up once:
+The plugin uses a virtual environment for isolation. Set up once with [uv](https://docs.astral.sh/uv/):
 ```bash
 cd ~/llama-spark-plugin
-python3 -m venv .venv
-.venv/bin/pip install -r mcp/requirements.txt
+uv venv
+uv pip install -r mcp/requirements.txt
 ```
 
 ## State Management
@@ -163,7 +163,7 @@ The plugin validates that the PID actually corresponds to a running llama-server
 
 - `jq` - JSON processing in bash
 - `python3` - Registry mutations and MCP server
-- `mcp`, `httpx` - MCP server (`pip install -r mcp/requirements.txt`)
+- `mcp`, `httpx` - MCP server (`uv pip install -r mcp/requirements.txt`)
 - `huggingface-cli` - Model downloads (from huggingface_hub)
 - llama.cpp - Built at `~/llama.cpp/build/bin/`
 

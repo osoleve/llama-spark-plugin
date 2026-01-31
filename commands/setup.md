@@ -54,8 +54,8 @@ Note: Architecture `100` is for Blackwell GPUs. Adjust if needed.
 3. **Set up Python venv** (for model conversion):
 ```bash
 cd ~/llama.cpp
-python3 -m venv .venv
-.venv/bin/pip install -r requirements.txt
+uv venv
+uv pip install -r requirements.txt
 ```
 
 4. **Create models directory**:

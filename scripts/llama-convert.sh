@@ -47,7 +47,7 @@ fi
 
 if [[ ! -d "$VENV_DIR" ]]; then
     echo "Error: Python venv not found at $VENV_DIR"
-    echo "Create it with: python3 -m venv $VENV_DIR && $VENV_DIR/bin/pip install -r $LLAMA_CPP_DIR/requirements.txt"
+    echo "Create it with: cd $LLAMA_CPP_DIR && uv venv && uv pip install -r requirements.txt"
     exit 1
 fi
 
