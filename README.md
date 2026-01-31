@@ -12,8 +12,27 @@ A comprehensive llama.cpp management plugin optimized for NVIDIA DGX Spark.
 
 ## Installation
 
-1. Clone or copy this directory to `~/llama-spark-plugin/`
-2. Add to your Claude Code plugins configuration
+**Option 1: Load directly (development/testing)**
+```bash
+claude --plugin-dir ~/llama-spark-plugin
+```
+Plugin loads for that session only. Restart Claude Code to pick up changes.
+
+**Option 2: Install from GitHub**
+```bash
+# In Claude Code:
+/plugin marketplace add https://github.com/osoleve/llama-spark-plugin
+/plugin install llama-spark
+```
+
+**Option 3: Install from local clone**
+```bash
+git clone https://github.com/osoleve/llama-spark-plugin ~/llama-spark-plugin
+
+# In Claude Code:
+/plugin marketplace add ~/llama-spark-plugin
+/plugin install llama-spark
+```
 
 ## Commands
 
