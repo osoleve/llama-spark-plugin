@@ -129,9 +129,11 @@ Example usage (Claude will use these automatically when appropriate):
 
 ### MCP Dependencies
 
-Install before first use:
+The plugin uses a virtual environment for isolation. Set up once:
 ```bash
-pip install -r ~/llama-spark-plugin/mcp/requirements.txt
+cd ~/llama-spark-plugin
+python3 -m venv .venv
+.venv/bin/pip install -r mcp/requirements.txt
 ```
 
 ## State Management
@@ -153,6 +155,7 @@ The plugin validates that the PID actually corresponds to a running llama-server
 ## Security
 
 - **Safe network default**: Binds to `127.0.0.1` by default
+- **State file permissions**: Created with mode 600 (owner-only)
 - **Command injection protection**: All user inputs properly quoted
 - **Silent hooks**: No output when server isn't running
 
