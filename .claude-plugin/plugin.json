@@ -1,0 +1,10 @@
+{
+  "name": "llama-spark",
+  "version": "1.0.0",
+  "description": "llama.cpp server management for NVIDIA DGX Spark",
+  "author": "osoleve",
+  "commands": "commands",
+  "skills": "skills",
+  "hooks": "hooks",
+  "agents": "agents"
+}

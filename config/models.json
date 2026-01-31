@@ -1,0 +1,27 @@
+{
+  "models_dir": "/home/osoleve/models",
+  "models": {
+    "nemotron": {
+      "path": "nemotron3-gguf/Nemotron-3-Nano-30B-A3B-UD-Q8_K_XL.gguf",
+      "description": "Nemotron 3 Nano 30B MoE - high quality reasoning",
+      "context_size": 8192,
+      "gpu_layers": 99,
+      "aliases": ["nem", "nemotron3"]
+    },
+    "glm-4.7-flash": {
+      "path": "glm-4.7-flash-hf/GLM-4.7-Flash-Q8_0.gguf",
+      "description": "GLM 4.7 Flash - fast inference",
+      "context_size": 8192,
+      "gpu_layers": 99,
+      "aliases": ["glm", "glm-flash"]
+    }
+  },
+  "defaults": {
+    "host": "127.0.0.1",
+    "port": 30000,
+    "threads": 8,
+    "context_size": 8192,
+    "gpu_layers": 99,
+    "flash_attn": true
+  }
+}
