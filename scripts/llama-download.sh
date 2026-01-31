@@ -26,9 +26,14 @@ usage() {
     exit 1
 }
 
-# Check for huggingface-cli
-if ! command -v huggingface-cli &>/dev/null; then
-    echo "Error: huggingface-cli not found"
+# Check for hf CLI (prefer 'hf', fall back to 'huggingface-cli')
+HF_CLI=""
+if command -v hf &>/dev/null; then
+    HF_CLI="hf"
+elif command -v huggingface-cli &>/dev/null; then
+    HF_CLI="huggingface-cli"
+else
+    echo "Error: HuggingFace CLI not found"
     echo "Install with: uv tool install huggingface_hub"
     exit 1
 fi
@@ -95,7 +100,7 @@ fi
 echo ""
 
 # Build download command
-HF_ARGS=(huggingface-cli download "$REPO" --local-dir "$DOWNLOAD_DIR")
+HF_ARGS=("$HF_CLI" download "$REPO" --local-dir "$DOWNLOAD_DIR")
 
 if [[ -n "$FILE_PATTERN" ]]; then
     HF_ARGS+=(--include "$FILE_PATTERN")

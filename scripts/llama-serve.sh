@@ -23,9 +23,9 @@ usage() {
     exit 1
 }
 
-# Check if server already running
-status=$(get_server_status)
-if [[ "$status" == "running" ]]; then
+# Check if server already running (call directly to preserve globals)
+get_server_status >/dev/null
+if [[ -n "$SERVER_PID" ]]; then
     echo "Error: Server already running (PID $SERVER_PID, model: $SERVER_MODEL, port: $SERVER_PORT)"
     echo "Run /llama:stop first, or use /llama:status for details"
     exit 1

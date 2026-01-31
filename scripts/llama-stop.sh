@@ -23,10 +23,10 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Get current status
-status=$(get_server_status)
+# Get current status (call directly to preserve globals)
+get_server_status >/dev/null
 
-if [[ "$status" != "running" ]]; then
+if [[ -z "$SERVER_PID" ]]; then
     echo "No llama-server is currently running."
     # Clean up any stale state file
     cleanup_state
