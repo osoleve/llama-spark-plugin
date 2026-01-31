@@ -9,6 +9,7 @@ A comprehensive llama.cpp management plugin optimized for NVIDIA DGX Spark.
 - **HuggingFace Integration**: Download models directly from the Hub
 - **GGUF Conversion**: Convert and quantize models
 - **DGX Spark Optimized**: Defaults tuned for Grace-Blackwell architecture
+- **MCP Integration**: Claude can call the local model directly via tools
 
 ## Installation
 
@@ -111,6 +112,28 @@ Override defaults with CLI flags:
 - Context: `8192`
 - Flash Attention: enabled
 
+## MCP Tools (Claude ↔ Local Model)
+
+Once the server is running, Claude can call the local model directly:
+
+| Tool | Description |
+|------|-------------|
+| `llama_chat` | Chat completion with message history |
+| `llama_complete` | Raw text completion |
+| `llama_status` | Check server health |
+
+Example usage (Claude will use these automatically when appropriate):
+- "Ask the local model to review this function"
+- "Have nemotron explain this error message"
+- "Compare your answer with the local model"
+
+### MCP Dependencies
+
+Install before first use:
+```bash
+pip install -r ~/llama-spark-plugin/mcp/requirements.txt
+```
+
 ## State Management
 
 Server state is tracked in `~/.llama-server-state.json`:
@@ -136,7 +159,8 @@ The plugin validates that the PID actually corresponds to a running llama-server
 ## Dependencies
 
 - `jq` - JSON processing in bash
-- `python3` - Registry mutations
+- `python3` - Registry mutations and MCP server
+- `mcp`, `httpx` - MCP server (`pip install -r mcp/requirements.txt`)
 - `huggingface-cli` - Model downloads (from huggingface_hub)
 - llama.cpp - Built at `~/llama.cpp/build/bin/`
 
@@ -145,6 +169,10 @@ The plugin validates that the PID actually corresponds to a running llama-server
 ```
 llama-spark-plugin/
 ├── .claude-plugin/plugin.json  # Plugin manifest
+├── .mcp.json                    # MCP server registration
+├── mcp/                         # MCP server for inference
+│   ├── llama_mcp_server.py
+│   └── requirements.txt
 ├── commands/                    # Slash commands
 ├── skills/dgx-spark-llm/       # Optimization guidance
 ├── hooks/                       # Session start hook
