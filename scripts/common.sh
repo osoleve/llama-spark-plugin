@@ -154,15 +154,19 @@ write_state() {
     local started_at
     started_at="$(date -Iseconds)"
 
-    jq -n \
-        --argjson pid "$pid" \
-        --argjson port "$port" \
-        --arg model "$model" \
-        --arg log_file "$log_file" \
-        --arg command "$cmd" \
-        --arg started_at "$started_at" \
-        '{pid: $pid, port: $port, model: $model, log_file: $log_file, command: $command, started_at: $started_at}' \
-        > "$STATE_FILE"
+    # Create with restrictive permissions (owner-only) from the start
+    (
+        umask 077
+        jq -n \
+            --argjson pid "$pid" \
+            --argjson port "$port" \
+            --arg model "$model" \
+            --arg log_file "$log_file" \
+            --arg command "$cmd" \
+            --arg started_at "$started_at" \
+            '{pid: $pid, port: $port, model: $model, log_file: $log_file, command: $command, started_at: $started_at}' \
+            > "$STATE_FILE"
+    )
 }
 
 # Clean up state file

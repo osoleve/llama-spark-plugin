@@ -1,9 +1,6 @@
 {
-  "mcpServers": {
-    "llama": {
-      "command": "${CLAUDE_PLUGIN_ROOT}/.venv/bin/python",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/llama_mcp_server.py"],
-      "description": "Local llama.cpp inference via llama-server"
-    }
+  "llama": {
+    "command": "${CLAUDE_PLUGIN_ROOT}/.venv/bin/python",
+    "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/llama_mcp_server.py"]
   }
 }
