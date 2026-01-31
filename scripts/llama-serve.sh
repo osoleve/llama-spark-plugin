@@ -133,7 +133,7 @@ FINAL_THREADS="${THREADS:-$DEFAULT_THREADS}"
 # Flash attention (default on unless explicitly disabled)
 FLASH_ARGS=""
 if [[ "$FLASH_ATTN" != "off" && "$DEFAULT_FLASH" == "true" ]]; then
-    FLASH_ARGS="--flash-attn"
+    FLASH_ARGS="--flash-attn on"
 fi
 
 # Set up logging
